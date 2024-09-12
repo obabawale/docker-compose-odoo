@@ -1,0 +1,37 @@
+version: '3.1'
+services:
+  web:
+    image: odoo:16.0
+    container_name: tpl-web
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - tpl-web-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./topline:/mnt/extra-addons
+      - ../enterprise:/mnt/enterprise
+    environment:
+      - PASSWORD_FILE=/run/secrets/postgresql_password
+      - HOST=db
+    secrets:
+      - postgresql_password
+  db:
+    image: postgres:15
+    container_name: tpl-db
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgresql_password
+      - POSTGRES_USER=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - tpl-db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+volumes:
+  tpl-web-data:
+  tpl-db-data:
+secrets:
+  postgresql_password:
+    file: odoo_pg_pass
